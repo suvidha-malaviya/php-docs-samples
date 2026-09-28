@@ -940,6 +940,9 @@ class secretmanagerTest extends TestCase
         $this->assertSame(SecretType::ACCESS_KEY, $secret->getSecretType());
     }
 
+    /**
+     * @depends testCreateSecretWithType
+     */
     public function testGetSecretType()
     {
         $name = self::$client->parseName(self::$testSecretWithTypeToCreateName);

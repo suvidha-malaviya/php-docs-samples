@@ -1109,9 +1109,9 @@ class regionalsecretmanagerTest extends TestCase
 
         $secret = self::createCloudSqlCredentialsSecret();
         $member = $secret->getPolicyMember()->getIamPolicyUidPrincipal();
-        self::grantCloudSqlRole($member);
 
         try {
+            self::grantCloudSqlRole($member);
             $name = self::$client->parseName($secret->getName());
 
             $output = $this->runFunctionSnippet('enable_regional_secret_managed_rotation', [
@@ -1137,9 +1137,9 @@ class regionalsecretmanagerTest extends TestCase
 
         $secret = self::createCloudSqlCredentialsSecret();
         $member = $secret->getPolicyMember()->getIamPolicyUidPrincipal();
-        self::grantCloudSqlRole($member);
 
         try {
+            self::grantCloudSqlRole($member);
             $name = self::$client->parseName($secret->getName());
 
             $this->runFunctionSnippet('enable_regional_secret_managed_rotation', [
@@ -1171,9 +1171,9 @@ class regionalsecretmanagerTest extends TestCase
 
         $secret = self::createCloudSqlCredentialsSecret();
         $member = $secret->getPolicyMember()->getIamPolicyUidPrincipal();
-        self::grantCloudSqlRole($member);
 
         try {
+            self::grantCloudSqlRole($member);
             $name = self::$client->parseName($secret->getName());
 
             $this->runFunctionSnippet('enable_regional_secret_managed_rotation', [
@@ -1202,6 +1202,9 @@ class regionalsecretmanagerTest extends TestCase
         }
     }
 
+    /**
+     * @depends testCreateSecretWithCloudSqlCredentials
+     */
     public function testGetRegionalSecretType()
     {
         $name = self::$client->parseName(self::$testSecretCloudSqlToCreateName);

@@ -35,22 +35,12 @@ use Google\Protobuf\Duration;
 use Google\Protobuf\FieldMask;
 
 /**
- * Reconfigure the recurring rotation schedule on a secret that already has
- * Cloud SQL managed rotation enabled (see
- * enable_regional_secret_managed_rotation.php). This only applies to
- * regional secrets of the CLOUD_SQL_DB_CREDENTIALS type -- calling it on any
- * other secret type, or before managed rotation has been enabled, fails.
- *
- * $rotationPeriodSeconds is the interval between rotations, in whole
- * seconds. The service requires it to be at least 3600 (1 hour), and the
- * derived next rotation time (now + $rotationPeriodSeconds) must be at least
- * 300 seconds (5 minutes) in the future -- both are enforced by the API, not
- * checked client-side here.
+ * Updates the rotation schedule of a CLOUD_SQL_DB_CREDENTIALS typed secret.
  *
  * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
- * @param string $locationId Location of the secret (e.g. 'us-central1')
- * @param string $secretId  ID of the Cloud SQL DB credentials secret to reconfigure
- * @param int $rotationPeriodSeconds Seconds between rotations; must be at least 3600 (1 hour)
+ * @param string $locationId Your secret Location (e.g. 'us-central1')
+ * @param string $secretId  Your secret ID (e.g. 'my-secret')
+ * @param int $rotationPeriodSeconds Rotation period in seconds (e.g. 3600)
  */
 function update_regional_secret_with_managed_rotation_schedule(string $projectId, string $locationId, string $secretId, int $rotationPeriodSeconds): void
 {
@@ -63,6 +53,11 @@ function update_regional_secret_with_managed_rotation_schedule(string $projectId
     // Build the resource name of the secret.
     $name = $client->projectLocationSecretName($projectId, $locationId, $secretId);
 
+    // The rotation schedule of a CLOUD_SQL_DB_CREDENTIALS secret can be set
+    // before or after enabling managed rotation; EnableManagedRotation does not
+    // need to be called first. Other secret types also support a rotation
+    // schedule, but only when Pub/Sub topics are configured. Pub/Sub topics are
+    // not required for CLOUD_SQL_DB_CREDENTIALS.
     // next_rotation_time and rotation_period must be set together.
     $nextRotationTimeSeconds = time() + $rotationPeriodSeconds;
 
@@ -76,11 +71,8 @@ function update_regional_secret_with_managed_rotation_schedule(string $projectId
         'rotation' => $rotation,
     ]);
 
-    // Mask only the two subfields being set here, not the whole "rotation"
-    // submessage -- that would also include managed_rotation_status, which
-    // is output-only and rejects a whole-submessage replace with "immutable
-    // and cannot be updated" (confirmed empirically against a live
-    // project).
+    // Mask only the rotation subfields being set, not the whole "rotation"
+    // submessage.
     $fieldMask = new FieldMask();
     $fieldMask->setPaths(['rotation.next_rotation_time', 'rotation.rotation_period']);
 

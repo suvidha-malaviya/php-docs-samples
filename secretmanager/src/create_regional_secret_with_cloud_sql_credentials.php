@@ -32,14 +32,10 @@ use Google\Cloud\SecretManager\V1\Secret\SecretType;
 use Google\Cloud\SecretManager\V1\Client\SecretManagerServiceClient;
 
 /**
- * Create a new secret with the Cloud SQL DB credentials secret type. This
- * type is required to enable Secret Manager's automatic rotation of Cloud
- * SQL passwords. It can only be set when the secret is created, and the
- * secret's location must match the region of the target Cloud SQL instance.
+ * Creates a new regional secret with type CLOUD_SQL_DB_CREDENTIALS.
  *
  * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
- * @param string $locationId Location of the secret; must match the Cloud SQL
- *     instance's region (e.g. 'us-central1')
+ * @param string $locationId Your secret Location (e.g. 'us-central1')
  * @param string $secretId  Your secret ID (e.g. 'my-secret')
  */
 function create_regional_secret_with_cloud_sql_credentials(string $projectId, string $locationId, string $secretId): void
@@ -64,10 +60,8 @@ function create_regional_secret_with_cloud_sql_credentials(string $projectId, st
 
     printf('Created secret: %s%s', $newSecret->getName(), PHP_EOL);
 
-    // This built-in identity is what you grant Cloud SQL IAM permissions to,
-    // so that Secret Manager can rotate the database password on its behalf.
     printf(
-        'Grant this identity Cloud SQL IAM permissions to enable rotation: %s%s',
+        'Grant the Cloud SQL User rotate IAM permissions to enable managed rotation to: %s%s',
         $newSecret->getPolicyMember()->getIamPolicyUidPrincipal(),
         PHP_EOL
     );

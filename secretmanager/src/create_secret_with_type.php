@@ -35,17 +35,12 @@ use Google\Cloud\SecretManager\V1\Secret\SecretType;
 use Google\Cloud\SecretManager\V1\Client\SecretManagerServiceClient;
 
 /**
- * Create a new secret with the given secret type restriction (e.g.
- * ACCESS_KEY, CERTIFICATE, OTHER_DB_CREDENTIALS, or OTHER -- use
- * CLOUD_SQL_DB_CREDENTIALS only for a regional secret that will go through
- * enable_regional_secret_managed_rotation.php). Unlike
- * CLOUD_SQL_DB_CREDENTIALS, these other secret types are plain metadata
- * tags: they don't require any additional credentials payload at creation
- * time.
+ * Creates a new secret with the given secret type.
+ * Note: CLOUD_SQL_DB_CREDENTIALS is only supported in the regional secret.
  *
- * @param string $projectId  Your Google Cloud Project ID (e.g. 'my-project')
- * @param string $secretId   Your secret ID (e.g. 'my-secret')
- * @param string $secretType Secret type restriction to apply (e.g. 'ACCESS_KEY', 'CERTIFICATE', 'OTHER_DB_CREDENTIALS', 'OTHER')
+ * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
+ * @param string $secretId  Your secret ID (e.g. 'my-secret')
+ * @param string $secretType Your secret type (e.g. 'OTHER')
  */
 function create_secret_with_type(string $projectId, string $secretId, string $secretType): void
 {
@@ -65,7 +60,7 @@ function create_secret_with_type(string $projectId, string $secretId, string $se
     // Build the request.
     $request = CreateSecretRequest::build($parent, $secretId, $secret);
 
-    // Create the secret, with the given secret type restriction.
+    // Create the secret.
     $newSecret = $client->createSecret($request);
 
     // Print the new secret name.

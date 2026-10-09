@@ -49,11 +49,7 @@ class regionalsecretmanagerTest extends TestCase
 {
     use TestTrait;
 
-    // Role granted to a Cloud SQL DB credentials secret's built-in identity
-    // so that managed rotation can update the Cloud SQL user's password.
-    // This grant is per-secret (the member is the secret's own generated
-    // principal), so it has to be made fresh for every secret the Cloud SQL
-    // managed-rotation tests create.
+    // Role granted to the secret's identity to enable managed rotation.
     private const CLOUD_SQL_ROLE = 'roles/cloudsql.admin';
 
     private static $client;
@@ -148,12 +144,6 @@ class regionalsecretmanagerTest extends TestCase
             self::$testRotationTopic = $envTopic;
         }
 
-        // CLOUD_SQL_INSTANCE is the bare Cloud SQL instance ID (no project
-        // or region prefix). The instance must be in self::$locationId's
-        // region, and CLOUD_SQL_USER must already exist as a database user
-        // on it. Standing up a real Cloud SQL instance per test run is
-        // expensive, so it's supplied as a pre-provisioned fixture via env
-        // vars rather than created here.
         $cloudSqlInstance = getenv('CLOUD_SQL_INSTANCE');
         $cloudSqlUser = getenv('CLOUD_SQL_USER');
         if ($cloudSqlInstance === false || $cloudSqlInstance === '' || $cloudSqlUser === false || $cloudSqlUser === '') {
@@ -254,11 +244,7 @@ class regionalsecretmanagerTest extends TestCase
     }
 
     /**
-     * Grants self::CLOUD_SQL_ROLE to $member on the project. SetIamPolicy
-     * replaces the whole policy, so this reads the current policy, adds the
-     * member to the existing (or a new) binding for the role, and writes it
-     * back -- retrying the whole read-modify-write if another writer raced
-     * us (an ABORTED status from an etag mismatch).
+     * Grants self::CLOUD_SQL_ROLE to $member on the project.
      */
     private static function grantCloudSqlRole(string $member): void
     {
@@ -292,8 +278,7 @@ class regionalsecretmanagerTest extends TestCase
                 self::$projectsClient->setIamPolicy(
                     (new SetIamPolicyRequest())->setResource($resource)->setPolicy($policy)
                 );
-                // IAM grants are eventually consistent; give it a moment
-                // before a caller tries to use it for managed rotation.
+                // Wait for the IAM grant to propagate.
                 sleep(10);
                 return;
             } catch (GaxApiException $e) {

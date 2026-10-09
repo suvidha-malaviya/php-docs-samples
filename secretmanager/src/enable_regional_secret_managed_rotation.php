@@ -31,26 +31,18 @@ use Google\Cloud\SecretManager\V1\EnableManagedRotationRequest\CloudSQLSingleUse
 use Google\Cloud\SecretManager\V1\Client\SecretManagerServiceClient;
 
 /**
- * Enable managed rotation for a Cloud SQL DB credentials secret. This links
- * the secret to a Cloud SQL instance and database user, and can only be
- * called once per secret. It adds the secret's first version and sets the
- * matching password on the Cloud SQL user, taking the place of a manually
- * added secret version, which this secret type doesn't support. Afterwards,
- * use rotate_regional_secret.php to trigger further rotations.
- *
- * $instanceId is the bare Cloud SQL instance ID (e.g. "my-instance") -- not a
- * connection name. Neither the project nor the region should be included:
- * passing "PROJECT_ID:INSTANCE_ID" (as gcloud's own
- * `enable-managed-rotation --help` examples misleadingly show) or the full
- * "PROJECT_ID:LOCATION_ID:INSTANCE_ID" connection name both fail -- the
- * service already knows the project from the secret's own path, and prepends
- * it internally, so a qualified value ends up double-prefixed.
+ * Enables managed rotation of a CLOUD_SQL_DB_CREDENTIALS typed secret.
+ * It validates and enables the rotation, adding a version and sets the
+ * passed password (optional).
+ * Note: AddSecretVersion is disabled on the CLOUD_SQL_DB_CREDENTIALS
+ * currently and for any necessary manual rotations please trigger
+ * rotate_secret.
  *
  * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
- * @param string $locationId Location of the secret (e.g. 'us-central1')
- * @param string $secretId  ID of the Cloud SQL DB credentials secret to enable rotation on
- * @param string $instanceId Bare ID of the Cloud SQL instance (no project or region prefix)
- * @param string $username Username of the Cloud SQL database user
+ * @param string $locationId Your secret Location (e.g. 'us-central1')
+ * @param string $secretId  Your secret ID (e.g. 'my-secret')
+ * @param string $instanceId Your Cloud SQL instance ID
+ * @param string $username Your Cloud SQL database username
  */
 function enable_regional_secret_managed_rotation(string $projectId, string $locationId, string $secretId, string $instanceId, string $username): void
 {
@@ -66,8 +58,6 @@ function enable_regional_secret_managed_rotation(string $projectId, string $loca
     $credentials = new CloudSQLSingleUserCredentials([
         'instance_id' => $instanceId,
         'username' => $username,
-        // Leaving password unset lets Secret Manager generate a secure
-        // password itself.
     ]);
 
     $request = (new EnableManagedRotationRequest())

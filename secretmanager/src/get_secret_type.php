@@ -32,9 +32,7 @@ use Google\Cloud\SecretManager\V1\GetSecretRequest;
 use Google\Cloud\SecretManager\V1\Secret\SecretType;
 
 /**
- * Get and print the secret type (e.g. CLOUD_SQL_DB_CREDENTIALS, ACCESS_KEY,
- * CERTIFICATE, OTHER_DB_CREDENTIALS, OTHER, or SECRET_TYPE_UNSPECIFIED for a
- * secret with no type restriction) of the given secret.
+ * Gets the secret type of the given secret.
  *
  * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
  * @param string $secretId  Your secret ID (e.g. 'my-secret')

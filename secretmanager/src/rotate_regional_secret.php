@@ -30,15 +30,12 @@ use Google\Cloud\SecretManager\V1\RotateSecretRequest;
 use Google\Cloud\SecretManager\V1\Client\SecretManagerServiceClient;
 
 /**
- * Trigger a managed rotation for a Cloud SQL DB credentials secret. Managed
- * rotation must already be enabled on the secret (see
- * enable_regional_secret_managed_rotation.php). Each call generates a new
- * password, updates the Cloud SQL user, and adds the result as a new secret
- * version.
+ * Triggers an adhoc rotation for the managed CLOUD_SQL_DB_CREDENTIALS typed
+ * secret.
  *
  * @param string $projectId Your Google Cloud Project ID (e.g. 'my-project')
- * @param string $locationId Location of the secret (e.g. 'us-central1')
- * @param string $secretId  ID of the Cloud SQL DB credentials secret to rotate
+ * @param string $locationId Your secret Location (e.g. 'us-central1')
+ * @param string $secretId  Your secret ID (e.g. 'my-secret')
  */
 function rotate_regional_secret(string $projectId, string $locationId, string $secretId): void
 {
@@ -48,9 +45,7 @@ function rotate_regional_secret(string $projectId, string $locationId, string $s
     // Create the Secret Manager client.
     $client = new SecretManagerServiceClient($options);
 
-    // Build the resource name of the secret. Note that although the field is
-    // named "parent", its value is the full secret resource name, not a
-    // collection parent.
+    // Build the resource name of the secret.
     $parent = $client->projectLocationSecretName($projectId, $locationId, $secretId);
 
     $request = (new RotateSecretRequest())
